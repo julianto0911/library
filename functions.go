@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/google/go-querystring/query"
-	"golang.org/x/crypto/bcrypt"
 )
 
 func EnvArray(envName string) []string {
@@ -38,11 +37,6 @@ var ctxB = context.Background()
 func RandomNumber(min, max int) int {
 	randomNumberPin := rand.Intn(max-min) + min
 	return randomNumberPin
-}
-
-func HashPassword(password string) string {
-	bytes, _ := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes)
 }
 
 var letters = []rune("1234567890abcdefghijklmnopqrstuvwxyz")
