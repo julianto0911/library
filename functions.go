@@ -13,6 +13,8 @@ import (
 	"time"
 
 	"github.com/google/go-querystring/query"
+	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func EnvArray(envName string) []string {
@@ -92,4 +94,16 @@ func (hc HttpClient) GET(header http.Header, url string) ([]byte, error) {
 
 func Random() string {
 	return strconv.Itoa(100 + rand.Intn(1000-100))
+}
+
+func HashPassword(password string) string {
+	bytes, _ := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes)
+}
+func VerifyPassword(hashedPassword, password string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+}
+func UUID() string {
+	id := uuid.New()
+	return id.String()
 }
