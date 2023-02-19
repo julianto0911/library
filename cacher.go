@@ -10,6 +10,7 @@ type RedisConfiguration struct {
 	URL      string
 	Password string
 	Prefix   string
+	Port     string
 }
 
 func newRedisClient(url, password string, dbIndex int) *redis.Client {
