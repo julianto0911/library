@@ -1,8 +1,10 @@
 package library
 
 import (
+	"testing"
 	"time"
 
+	"github.com/alicebob/miniredis/v2"
 	"github.com/go-redis/redis/v8"
 )
 
@@ -46,4 +48,23 @@ func (c *Cache) Get(name string) (string, error) {
 
 func (c *Cache) Delete(name string) error {
 	return c.rdb.Del(ctxB, c.prefix+"_"+name).Err()
+}
+
+// use this when init for ServiceContext, for local test
+func MockCache(t *testing.T) Cache {
+	mr, err := miniredis.Run()
+	if err != nil {
+		t.Fatalf("fail init mock cache: %s", err)
+	}
+
+	client := redis.NewClient(&redis.Options{Addr: mr.Addr()})
+	_, err = miniredis.Run()
+	if err != nil {
+		t.Fatalf("fail run mock cache: %s", err)
+	}
+
+	return Cache{
+		rdb:    client,
+		prefix: "",
+	}
 }

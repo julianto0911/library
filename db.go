@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"testing"
 	"time"
 
 	_ "github.com/lib/pq"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -94,4 +96,32 @@ func NewDatabaseConnection(config DBConfiguration, l *zap.Logger) (*gorm.DB, err
 func makePostgresString(p DBParam) string {
 	return fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s connect_timeout=%d application_name=%s",
 		p.Host, p.Port, p.User, p.Name, p.Password, p.Timeout, p.AppName)
+}
+
+func MockGormDB(t *testing.T) (sqlmock.Sqlmock, *gorm.DB, error) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("error init mock: %s", err)
+		return nil, nil, err
+	}
+
+	newLogger := logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
+		logger.Config{
+			SlowThreshold:             time.Second, // Slow SQL threshold
+			LogLevel:                  logger.Info, // Log level
+			IgnoreRecordNotFoundError: false,       // Ignore ErrRecordNotFound error for logger
+			Colorful:                  true,        // Disable color
+		},
+	)
+
+	gormDB, gerr := gorm.Open(postgres.New(
+		postgres.Config{Conn: db}), &gorm.Config{Logger: newLogger})
+	if gerr != nil {
+		t.Fatalf("error init db: %s", err)
+		return nil, nil, err
+	}
+	gormDB.Logger.LogMode(logger.LogLevel(1))
+
+	return mock, gormDB, nil
 }
