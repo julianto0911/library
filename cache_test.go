@@ -9,29 +9,28 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-//use this when init for ServiceContext, for local test
-func NewMockCacher(t *testing.T) Cacher {
+// use this when init for ServiceContext, for local test
+func NewMockCache(t *testing.T) Cache {
 	mr, err := miniredis.Run()
 	if err != nil {
-		t.Fatalf("fail init mock cacher: %s", err)
+		t.Fatalf("fail init mock cache: %s", err)
 	}
 
 	client := redis.NewClient(&redis.Options{Addr: mr.Addr()})
 	_, err = miniredis.Run()
 	if err != nil {
-		t.Fatalf("fail run mock cacher: %s", err)
+		t.Fatalf("fail run mock cache: %s", err)
 	}
 
-	return Cacher{
-		rdb:      client,
-		expiracy: time.Duration(10) * time.Second,
-		prefix:   "",
+	return Cache{
+		rdb:    client,
+		prefix: "",
 	}
 }
 
-func TestCacher(t *testing.T) {
-	r := NewMockCacher(t)
-	err := r.Set("key", "val")
+func TestCache(t *testing.T) {
+	r := NewMockCache(t)
+	err := r.Set("key", "val", 1*time.Minute)
 	assert.NoError(t, err)
 	val, err := r.Get("key")
 	assert.NoError(t, err)

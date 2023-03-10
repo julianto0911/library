@@ -8,8 +8,8 @@ import (
 	"go.uber.org/zap/zaptest"
 )
 
-//use this for init logger on ServiceContext , for local test
-func NewMockLogger(t *testing.T) *zap.Logger {
+// use this for init logger on ServiceContext , for local test
+func MockLogger(t *testing.T) *zap.Logger {
 	logger := zaptest.NewLogger(t, zaptest.WrapOptions(
 		zap.Hooks(func(e zapcore.Entry) error {
 			if e.Level == zap.ErrorLevel {
@@ -21,6 +21,6 @@ func NewMockLogger(t *testing.T) *zap.Logger {
 }
 
 func Test_Logger(t *testing.T) {
-	logger := NewMockLogger(t)
+	logger := MockLogger(t)
 	logger.Info("success")
 }

@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-func MockNewDatabaseConnection(t *testing.T) (sqlmock.Sqlmock, *gorm.DB, error) {
+func MockGormDB(t *testing.T) (sqlmock.Sqlmock, *gorm.DB, error) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("error init mock: %s", err)
