@@ -98,11 +98,21 @@ func makePostgresString(p DBParam) string {
 		p.Host, p.Port, p.User, p.Name, p.Password, p.Timeout, p.AppName)
 }
 
-func MockGormDB(t *testing.T) (sqlmock.Sqlmock, *gorm.DB, error) {
+func MockGormDB(t *testing.T, doLog bool) (sqlmock.Sqlmock, *gorm.DB, error) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("error init mock: %s", err)
 		return nil, nil, err
+	}
+
+	if !doLog {
+		gormDB, gerr := gorm.Open(postgres.New(
+			postgres.Config{Conn: db}), &gorm.Config{})
+		if gerr != nil {
+			t.Fatalf("error init db: %s", err)
+			return nil, nil, err
+		}
+		return mock, gormDB, nil
 	}
 
 	newLogger := logger.New(
