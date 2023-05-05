@@ -68,3 +68,36 @@ func MockCache(t *testing.T) Cache {
 		prefix: "",
 	}
 }
+
+func (c *Cache) GetKeys() []string {
+	var cursor uint64
+	var result []string
+	for {
+		var keys []string
+		var err error
+		keys, cursor, err = c.rdb.Scan(ctxB, cursor, "", 0).Result()
+		if err != nil {
+			panic(err)
+		}
+		result = append(result, keys...)
+		if cursor == 0 { // no more keys
+			break
+		}
+	}
+
+	return result
+}
+
+func (c *Cache) ClearKeys() {
+	keys := c.GetKeys()
+	pipe := c.rdb.Pipeline()
+	for _, key := range keys {
+		pipe.Del(ctxB, key)
+	}
+	pipe.Exec(ctxB)
+}
+
+func (c *Cache) Ping() bool {
+	_, err := c.rdb.Ping(ctxB).Result()
+	return err == nil
+}
