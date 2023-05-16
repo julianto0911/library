@@ -15,16 +15,16 @@ type CacheConfiguration struct {
 	Port     string
 }
 
-func newRedisClient(url, password string, dbIndex int) *redis.Client {
+func newRedisClient(url, port, password string, dbIndex int) *redis.Client {
 	return redis.NewClient(&redis.Options{
-		Addr:     url,
+		Addr:     url + ":" + port,
 		Password: password,
 		DB:       dbIndex,
 	})
 }
 func NewCache(cfg CacheConfiguration, expiracy int) Cache {
 	return Cache{
-		rdb:    newRedisClient(cfg.URL, cfg.Password, 0),
+		rdb:    newRedisClient(cfg.URL, cfg.Port, cfg.Password, 0),
 		prefix: cfg.Prefix,
 	}
 }
