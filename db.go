@@ -122,9 +122,12 @@ func NewMySQLConnection(config DBConfiguration, l *zap.Logger) (*gorm.DB, error)
 			Colorful:                  true,        // Disable color
 		},
 	)
-	db, err := gorm.Open(mysql.Open(makeMySQLString(dbCfg)), &gorm.Config{Logger: newLogger})
+
+	sql := makeMySQLString(dbCfg)
+	l.Info("sql string", zap.String("sql", sql))
+	db, err := gorm.Open(mysql.Open(sql), &gorm.Config{Logger: newLogger})
 	if err != nil {
-		return nil, errors.Wrap(err, "can't open db connection")
+		return nil, fmt.Errorf("cannot connect database : %w", err)
 	}
 
 	return db, err
