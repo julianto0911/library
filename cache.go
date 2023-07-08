@@ -1,6 +1,7 @@
 package library
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -68,7 +69,23 @@ func MockCache(t *testing.T) Cache {
 		prefix: "",
 	}
 }
+func LocalCache() (Cache, error) {
+	mr, err := miniredis.Run()
+	if err != nil {
+		return Cache{}, fmt.Errorf("fail init local cache: %s", err)
+	}
 
+	client := redis.NewClient(&redis.Options{Addr: mr.Addr()})
+	_, err = miniredis.Run()
+	if err != nil {
+		return Cache{}, fmt.Errorf("fail  run local cache: %s", err)
+	}
+
+	return Cache{
+		rdb:    client,
+		prefix: "",
+	}, nil
+}
 func (c *Cache) GetKeys() []string {
 	var cursor uint64
 	var result []string
